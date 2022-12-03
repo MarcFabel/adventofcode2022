@@ -23,7 +23,7 @@ import pandas as pd
 import numpy as np
 
 # paths
-z_path ='/Users/marc.fabel/projects/adventofcode22/data/'
+z_path ='/Users/marc.fabel/projects/adventofcode2022/data/'
 
 # magic numbers
 
@@ -31,18 +31,56 @@ z_path ='/Users/marc.fabel/projects/adventofcode22/data/'
 
 
 ###############################################################################
-#   Day 1
+#   Day 3 Rucksack Reorganization
 ###############################################################################
-calories = pd.read_csv(z_path + '1.txt',skip_blank_lines=False, names=['calories'])
 
-# generate elfe counter
-calories['elf'] = np.where(calories.calories.isnull(),1,0)
-calories['elf'] = calories['elf'].cumsum()
-calories['elf'] = calories['elf'] + 1
-calories.dropna(inplace=True)
 
-total = calories.groupby(by='elf').sum()
+# General Setup ###############################################################
+# define Ditionaries with points
+import string
+dict_lc = dict(zip(string.ascii_lowercase, range(1,27)))
+dict_up = dict(zip(string.ascii_uppercase, range(27,53)))
+dict_points = dict_lc.copy()
+dict_points.update(dict_up)
 
+
+# Part 1 - identify common elements in two compartments per rucksack ##########
+df = pd.read_csv(z_path + '3.txt', names=['rs'])
+
+# split rucksacks in two compartments
+df['comparment_length'] = (df['rs'].str.len() /2).astype(int)
+df['rs'].str.slice(0, df['comparment_length'])
+df['cmprmnt1'] = df.apply(lambda row: str(row['rs'])[:row['comparment_length']],
+                          axis=1)
+df['cmprmnt2'] = df.apply(lambda row: str(row['rs'])[row['comparment_length']:],
+                          axis=1)
+
+# points for common element
+df['common_element'] = df.apply(lambda row:
+                                list(set(row['cmprmnt1']).intersection((row['cmprmnt2'])))[0],
+                                axis=1)
+df['points_common_element'] = df['common_element'].map(dict_points)
+print(df['points_common_element'].sum())
+
+
+# Part 2 - Group Level ########################################################
+df['group'] = (((df.index ) // 3) + 1)
+df['count'] = df.groupby(['group']).cumcount()+1
+
+# reshape to have elements on group level
+group_level = pd.pivot(df, index='group', values='rs', columns='count')
+
+# common element
+group_level['common_element'] = group_level.apply(lambda row:
+                                list(
+                                    set(row[1]).intersection(row[2]).intersection(row[3])
+                                    )[0],
+                                axis=1)
+
+group_level['points_common_element'] = group_level['common_element'].map(dict_points)
+print(group_level['points_common_element'].sum())
+		
+    
 
 
 ###############################################################################
@@ -105,3 +143,19 @@ df['points_outcome'] = df['outcome'].map({'X':0, 'Y':3, 'Z':6})
 
 df['total'] = df['points_shape'] + df['points_outcome']
 print(df['total'].sum())
+
+
+
+
+###############################################################################
+#   Day 1
+###############################################################################
+calories = pd.read_csv(z_path + '1.txt',skip_blank_lines=False, names=['calories'])
+
+# generate elfe counter
+calories['elf'] = np.where(calories.calories.isnull(),1,0)
+calories['elf'] = calories['elf'].cumsum()
+calories['elf'] = calories['elf'] + 1
+calories.dropna(inplace=True)
+
+total = calories.groupby(by='elf').sum()
