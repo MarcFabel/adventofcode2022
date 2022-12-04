@@ -28,6 +28,39 @@ z_path ='/Users/marc.fabel/projects/adventofcode2022/data/'
 # magic numbers
 
 
+###############################################################################
+#   Day 4: Camp Cleanup
+###############################################################################
+
+df = pd.read_csv(z_path + '4.txt', names=['a1','a2'], sep=',')
+
+# Part 1 - how many pairs contain each other assignments ######################
+
+# have lower and upper bound of assignments in seperate columns
+df[['a1l','a1h']] = df['a1'].str.split('-', expand=True).astype(int)
+df[['a2l','a2h']] = df['a2'].str.split('-', expand=True).astype(int)
+
+# dummy - one assignment fully contains the other
+df['d_fully_contained'] = np.where(
+    # a1 contained in a2
+    ((df['a1l'] >= df['a2l']) & (df['a1h']<=df['a2h'])) |
+    
+    ((df['a2l'] >= df['a1l']) & (df['a2h']<=df['a1h'])),
+    1,0)
+
+print(df['d_fully_contained'].sum())
+
+
+# Part 2 - number of pairs that overlap at all ################################
+
+# dummy - is there an overlap of one assignment with the other
+df['d_overlap'] = np.where(
+    ((df['a1h']>=df['a2l']) & (df['a1l']<=df['a2l'])) |
+    ((df['a2h']>=df['a1l']) & (df['a2l']<=df['a1l'])),
+    1,0 )
+
+print(df['d_overlap'].sum())
+
 
 
 ###############################################################################
