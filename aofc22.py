@@ -33,46 +33,11 @@ z_path ='/Users/marc.fabel/projects/adventofcode2022/data/'
 ###############################################################################
 #   Day 5: Supply Stacks
 ###############################################################################
-
-
-# experimenting ###############################################################
-stacks = {
-    1 : ['Z', 'N'],
-    2 : ['M', 'C', 'D'],
-    3 : ['P']
-    }
-
-# get procedures
-df = pd.read_csv(z_path + 'tmp.txt', sep=' ', names=['x', 'qty', 'y', 'o', 'z', 'd'])
-df.drop(['x','y', 'z'], axis=1, inplace=True)
-
-
-# quantity, origin_stack, destination_stack
-row = 0
-while row < len(df):
-    qty, o, d =  df.iloc[row]['qty'], df.iloc[row]['o'], df.iloc[row]['d']
-    
-    # pick up - any reverse order
-    pick_up = stacks[o][-qty:]
-    # pick_up.reverse() # dependent on part 1 or 2
-    
-    # add to destination
-    for j in pick_up:
-        stacks[d].append(j)
-    
-    # remove from origin
-    stacks[o] = stacks[o][:-qty]
-    # print(stacks)
-    row = row+1
-
-
-
-# print top crates per stack
-result = []
-for k in stacks.keys(): 
-    result.append(stacks[k][-1])
-''.join(result)
-
+def top_crates_stack(dict):
+    result = []
+    for k in dict.keys(): 
+        result.append(dict[k][-1])
+    return ''.join(result)
 
 
 # Part 1 ######################################################################
@@ -81,14 +46,11 @@ for k in stacks.keys():
 stacks = pd.read_csv(z_path + '5_stack.txt', sep=',', header=None)
 stacks.columns = stacks.columns + 1
 stacks = stacks.sort_index(ascending=False)
-# stacks = stacks.replace(' ', np.nan)
-
 stacks = stacks.to_dict('list')
-
-# remove nans: 
+# remove empty spaces: 
 for k in [1,4,5,6,7,9]:
     stacks[k] = list(filter(lambda a: a != ' ', stacks[k]))
-        
+    
     
 
 # get procedures
@@ -96,13 +58,12 @@ df = pd.read_csv(z_path + '5.txt', sep=' ', names=['x', 'qty', 'y', 'o', 'z', 'd
 df.drop(['x','y', 'z'], axis=1, inplace=True)
     
     
-    
-# quantity, origin_stack, destination_stack
+# cary out instructions
 row = 0
 while row < len(df):
     qty, o, d =  df.iloc[row]['qty'], df.iloc[row]['o'], df.iloc[row]['d']
     
-    # pick up - any reverse order
+    # pick up - and reverse order
     pick_up = stacks[o][-qty:]
     pick_up.reverse()
     
@@ -112,14 +73,10 @@ while row < len(df):
     
     # remove from origin
     stacks[o] = stacks[o][:-qty]
-    # print(stacks)
     row = row+1
 
 # print top crates per stack
-result = []
-for k in stacks.keys(): 
-    result.append(stacks[k][-1])
-''.join(result)
+top_crates_stack(stacks)
 
 
 
@@ -130,26 +87,19 @@ for k in stacks.keys():
 stacks = pd.read_csv(z_path + '5_stack.txt', sep=',', header=None)
 stacks.columns = stacks.columns + 1
 stacks = stacks.sort_index(ascending=False)
-# stacks = stacks.replace(' ', np.nan)
-
 stacks = stacks.to_dict('list')
-
-# remove nans: 
+# remove empty spaces: 
 for k in [1,4,5,6,7,9]:
     stacks[k] = list(filter(lambda a: a != ' ', stacks[k]))
         
     
-# get procedures
-df = pd.read_csv(z_path + '5.txt', sep=' ', names=['x', 'qty', 'y', 'o', 'z', 'd'])
-df.drop(['x','y', 'z'], axis=1, inplace=True)
     
-    
-# quantity, origin_stack, destination_stack
+# cary out instructions
 row = 0
 while row < len(df):
     qty, o, d =  df.iloc[row]['qty'], df.iloc[row]['o'], df.iloc[row]['d']
     
-    # pick up - any reverse order
+    # pick up - NOT reverse order
     pick_up = stacks[o][-qty:]
     # pick_up.reverse()
     
@@ -159,15 +109,10 @@ while row < len(df):
     
     # remove from origin
     stacks[o] = stacks[o][:-qty]
-    # print(stacks)
     row = row+1
 
 # print top crates per stack
-result = []
-for k in stacks.keys(): 
-    result.append(stacks[k][-1])
-''.join(result)
-
+top_crates_stack(stacks)
 
 
 
