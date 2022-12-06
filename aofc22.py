@@ -57,10 +57,12 @@ while j_start < len(s):
     # duplicate entries - increase start by one
     if max(count) > 1:
         j_start = j_start +1
-        
+    
+    # just unique values: break loop and print solution
     else:
-        print('finished, answer: ', j_start + marker_length)
         j_start = len(s)
+        print('finished, answer: ', j_end)
+        
 
 
 
