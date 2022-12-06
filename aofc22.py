@@ -31,6 +31,40 @@ z_path ='/Users/marc.fabel/projects/adventofcode2022/data/'
 
 
 ###############################################################################
+#   Day 6: Tuning Trouble
+###############################################################################
+
+# define characters to be processed before the first start-of-message marker is detected
+marker_length = 14 # Part 1: 4 | Part 2: 14
+
+with open(z_path + '6.txt', 'r') as file:
+    s = file.read()
+
+# convert string to list of characters
+s = list(s)
+
+j_start = 0
+
+while j_start < len(s):
+    j_end = j_start + marker_length
+    export = s[j_start: j_end]
+    
+    # count occurences
+    count = []
+    for element in export:
+        count.append(export.count(element))
+        
+    # duplicate entries - increase start by one
+    if max(count) > 1:
+        j_start = j_start +1
+        
+    else:
+        print('finished, answer: ', j_start + marker_length)
+        j_start = len(s)
+
+
+
+###############################################################################
 #   Day 5: Supply Stacks
 ###############################################################################
 def top_crates_stack(dict):
