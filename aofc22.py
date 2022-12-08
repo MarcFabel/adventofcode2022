@@ -29,6 +29,162 @@ z_path ='/Users/marc.fabel/projects/adventofcode2022/data/'
 
 
 
+###############################################################################
+#   Day 8: Treetop Tree House
+###############################################################################
+
+
+df = pd.read_csv(z_path + '8.txt', header=None)
+df = df[0].apply(lambda x: pd.Series(list(x)))
+
+
+
+# Part 1: Visible Trees #######################################################
+
+visible = pd.DataFrame(index=range(0,99), columns=range(0,99), dtype='int')
+
+# replace first and last column with visible values
+visible[[0, 98]] = visible[[0, 98]].fillna(1)
+
+# replace top and bottom row with visible
+visible.iloc[0] = visible.iloc[0].fillna(1)
+visible.iloc[98] = visible.iloc[98].fillna(1)
+
+
+
+# loop through df  - 1,1 -> 97,97
+for row in range(1,98):
+    for column in range(1,98):
+        height = int(df.iloc[row,column])
+        
+        # define max in all directions - and get min to see whether tree is visible at all
+        left = df.loc[row,:column-1].max()
+        top = df.loc[:row-1, column].max()
+        right = df.loc[row,column+1:].max()
+        bottom = df.loc[row+1:, column].max()
+        min_height_all_directions = int(min([left, top, right, bottom]))
+
+        # replace value in visible box if tree is higher than in any 4 directions
+        if min_height_all_directions < height:
+            visible.iloc[row,column] = 1
+        else:
+            visible.iloc[row,column] = 0
+        
+        columns = column + 1
+        
+    row = row + 1
+        
+print(int(visible.sum().sum()))
+
+
+
+
+# Part 2 # Scenic Score #######################################################
+
+def xyz(hght, srs):
+    '''
+    Parameters
+    ----------
+    hght : Int
+        height of tree under consideration
+    srs : pd.Series 
+        series of trees left, right, above, or below current tree with their heights
+
+    Returns
+    -------
+    Int
+        Number of trees that we can see from current tree in direction of LTRB.
+
+    '''
+    # unblocked view
+    if hght > srs.max():
+        #retrun  how far you can see
+        return len(srs)
+        
+
+    #blocked view
+    else :
+        # relevant part of the series
+        relevent_srs = srs.where(srs>=hght)
+        location_next_tree = relevent_srs[relevent_srs.notnull()].index[0]
+        return abs(srs.index[0]-location_next_tree)+1
+
+
+
+
+scenic = pd.DataFrame(index=range(0,99), columns=range(0,99), dtype='int')
+
+# replace first and last column with scenic values
+scenic[[0, 98]] = scenic[[0, 98]].fillna(0)
+
+# replace top and bottom row with scenic
+scenic.iloc[0] = scenic.iloc[0].fillna(0)
+scenic.iloc[98] = scenic.iloc[98].fillna(0)
+
+# loop through df  - 1,1 -> 97,97
+for row in range(1,98):
+    for column in range(1,98):
+        
+        height = int(df.iloc[row,column])
+
+        
+        # define max in all directions - and get min to see whether tree is visible at all
+        left = df.loc[row,:column-1].sort_index(ascending=False).astype(int)
+        top = df.loc[:row-1, column].sort_index(ascending=False).astype(int)
+        right = df.loc[row,column+1:].astype(int)
+        bottom = df.loc[row+1:, column].astype(int)
+        
+        # calculate scenic score
+        scenic.iloc[row, column] = xyz(height, left) * xyz(height, right) * xyz(height, top) * xyz(height, bottom)
+        
+        columns = column + 1
+        
+    row = row + 1
+
+print(int(scenic.max().max()))
+    
+
+
+
+
+# Plotting ####################################################################
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+
+# plot map of first part - visibility, scenic
+scenic = scenic / 1000
+
+
+
+# Visible Trees 
+fig, ax = plt.subplots(figsize=(10,10)) 
+sns.heatmap(visible, cbar=False, ax=ax)
+ax.set_title('Visible Trees')
+
+
+# Scenic Score - Heatmap
+fig, ax = plt.subplots(figsize=(10,10)) 
+sns.heatmap(scenic, ax=ax)
+ax.set_title('scenic score [in 1,000]')
+
+
+# Scenic Score - 3 D Bar plot 
+temp = scenic.copy()
+temp = temp.reset_index()
+temp.rename(columns={'index':'row'}, inplace=True)
+temp = pd.melt(temp, id_vars='row', var_name='column', value_name = 'z')
+
+plt.figure()
+ax = plt.axes(projection= '3d')
+ax.bar3d(temp.row, temp.column, [0]*9801, [0.3]*9801, [1]*9801, temp.z)
+ax.set_title('scenic score [in 1,000] - 3D')
+
+
+
+
+
+
 
 ###############################################################################
 #   Day 6: Tuning Trouble
